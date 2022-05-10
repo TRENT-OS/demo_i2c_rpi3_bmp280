@@ -1,0 +1,44 @@
+/*
+ * Copyright (C) 2022, HENSOLDT Cyber GmbH
+ * SPDX-License-Identifier: BSD-3-Clause
+ */
+
+ /*
+  * I2C_Test CAmkES Component
+  */
+
+#pragma once
+import <std_connector.camkes>;
+
+#include "system_config.h"
+
+  component I2CTest {
+    control;
+    dataport Buf(0x8000)    regBase;
+  }
+  component I2C_HW {
+      hardware;
+      dataport Buf(0x8000)    regBase;
+  }
+
+  assembly {
+      composition {
+          //-------------------------------
+          // I2C
+          //-------------------------------
+
+          component I2CTest i2ctest;
+          component I2C_HW  i2c_hw;
+
+          connection seL4HardwareMMIO 
+              i2ctest_mmio (
+                  from i2ctest.regBase,
+                  to i2c_hw.regBase
+              );
+      }
+
+      configuration {
+          i2c_hw.regBase_paddr = 0x3F200000;
+          i2c_hw.regBase_size = 0x8000;
+      }
+  }

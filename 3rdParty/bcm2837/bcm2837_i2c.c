@@ -3,7 +3,8 @@
 
 //HElPER stuff
 
-#include "i2c_refactored.h"
+#include "bcm2837_i2c.h"
+#include <stddef.h>
 
 /* This variable allows us to test on hardware other than RPi.
 // It prevents access to the kernel memory, and does not do any peripheral access
@@ -18,7 +19,7 @@ static int i2c_byte_wait_us = 0;
 static volatile uint32_t bcm2835_bsc = NULL;
 
 
-int bcm2835_i2c_setup(void* vaddr)
+void bcm2837_delayMicroseconds(uint64_t dummyseconds);
 {
 //TODO Allow for both I2C to be used with outside Define!
     uint16_t cdiv = 0;

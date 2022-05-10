@@ -1,6 +1,11 @@
 /*
 * HENDSOLDT Cyber GmbH
 */
+#pragma once
+
+#include <stdint.h>
+#include "bcm2837_gpio.h"
+
 
 #define RPi3
 #define I2C1
@@ -9,6 +14,9 @@
 #define BCM2837_BSC0_BASE       0x205000
 /*! Base Address of the BSC1 registers */
 #define BCM2837_BSC1_BASE       0x804000
+
+/*! Speed of the core clock core_clk */
+#define BCM2837_CORE_CLK_HZ		250000000	/*!< 250 MHz */
 
 #ifdef RPi3
 #ifdef I2C1

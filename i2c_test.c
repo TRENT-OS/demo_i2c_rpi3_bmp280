@@ -117,18 +117,30 @@ OS_Error_t run(void)
     uint8_t ret;
 
     char buf_red[20];
-    char cmd[] = {0x6f};
+    char cmd[] = {0xd0};
 
+    for(int i = 0; i < 20; i++)
+    {
+        buf_red[i] = 0;        
+    }
+
+    //print_gpio_regs();
     Debug_LOG_INFO("Initialise I2C");
     if (!bcm2837_i2c_begin(regBase))
     {
         Debug_LOG_ERROR("Initialisation of I2C failed");
     }
+    //print_gpio_regs();
 
-    bcm2837_i2c_setSlaveAddress(0b11101100);
-    
-    ret = bcm2837_i2c_write_read_rs(cmd, 1, buf_red, 2);
+    bcm2837_i2c_setSlaveAddress(0x76);
+
+    ret = bcm2837_i2c_write(cmd, 1);
+    Debug_LOG_INFO("Wrote cmd, ret was %i", ret);
+    ret = bcm2837_i2c_read( buf_red, 1);
 
     Debug_LOG_INFO("value of ret was %i, buf contained %u %u", ret, buf_red[0], buf_red[1]);
+
+    //print_i2c_regs();
+
     return err;
 }

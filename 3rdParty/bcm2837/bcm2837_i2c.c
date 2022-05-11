@@ -88,7 +88,7 @@ void bcm2837_i2c_set_baudrate(uint32_t baudrate)
 }
 
 /* Writes an number of bytes to I2C */
-uint8_t bcm2837_i2c_write(const char * buf, uint32_t len)
+int bcm2837_i2c_write(const char * buf, uint32_t len)
 {
     volatile uint32_t* dlen    = bcm2837_bsc + BCM2837_BSC_DLEN/4;
     volatile uint32_t* fifo    = bcm2837_bsc + BCM2837_BSC_FIFO/4;
@@ -97,7 +97,7 @@ uint8_t bcm2837_i2c_write(const char * buf, uint32_t len)
 
     uint32_t remaining = len;
     uint32_t i = 0;
-    uint8_t reason = BCM2837_I2C_REASON_OK;
+//    int reason = BCM2837_I2C_REASON_OK;
 
     /* Clear FIFO */
     bcm2837_peri_set_bits(control, BCM2837_BSC_C_CLEAR_1 , BCM2837_BSC_C_CLEAR_1 );
@@ -128,31 +128,25 @@ uint8_t bcm2837_i2c_write(const char * buf, uint32_t len)
     	}
     }
 
+   bcm2837_peri_set_bits(control, BCM2837_BSC_S_DONE , BCM2837_BSC_S_DONE);
+
     /* Received a NACK */
     if (bcm2837_peri_read(status) & BCM2837_BSC_S_ERR)
     {
-	reason = BCM2837_I2C_REASON_ERROR_NACK;
+	    return BCM2837_I2C_REASON_ERROR_NACK;
     }
 
     /* Received Clock Stretch Timeout */
-    else if (bcm2837_peri_read(status) & BCM2837_BSC_S_CLKT)
+    if (bcm2837_peri_read(status) & BCM2837_BSC_S_CLKT)
     {
-	reason = BCM2837_I2C_REASON_ERROR_CLKT;
-    }
+	    return BCM2837_I2C_REASON_ERROR_CLKT;
+    } 
 
-    /* Not all data is sent */
-    else if (remaining)
-    {
-	reason = BCM2837_I2C_REASON_ERROR_DATA;
-    }
-
-    bcm2837_peri_set_bits(control, BCM2837_BSC_S_DONE , BCM2837_BSC_S_DONE);
-
-    return reason;
+    return (int) len - remaining;
 }
 
 /* Read an number of bytes from I2C */
-uint8_t bcm2837_i2c_read(char* buf, uint32_t len)
+int bcm2837_i2c_read(char* buf, uint32_t len)
 {
     volatile uint32_t* dlen    = bcm2837_bsc + BCM2837_BSC_DLEN/4;
     volatile uint32_t* fifo    = bcm2837_bsc + BCM2837_BSC_FIFO/4;
@@ -161,7 +155,7 @@ uint8_t bcm2837_i2c_read(char* buf, uint32_t len)
 
     uint32_t remaining = len;
     uint32_t i = 0;
-    uint8_t reason = BCM2837_I2C_REASON_OK;
+ //   uint8_t reason = BCM2837_I2C_REASON_OK;
 
     /* Clear FIFO */
     bcm2837_peri_set_bits(control, BCM2837_BSC_C_CLEAR_1 , BCM2837_BSC_C_CLEAR_1 );
@@ -194,27 +188,20 @@ uint8_t bcm2837_i2c_read(char* buf, uint32_t len)
         remaining--;
     }
     
+    bcm2837_peri_set_bits(status, BCM2837_BSC_S_DONE , BCM2837_BSC_S_DONE);
     /* Received a NACK */
     if (bcm2837_peri_read(status) & BCM2837_BSC_S_ERR)
     {
-	reason = BCM2837_I2C_REASON_ERROR_NACK;
+	    return BCM2837_I2C_REASON_ERROR_NACK;
     }
 
     /* Received Clock Stretch Timeout */
-    else if (bcm2837_peri_read(status) & BCM2837_BSC_S_CLKT)
+    if (bcm2837_peri_read(status) & BCM2837_BSC_S_CLKT)
     {
-	reason = BCM2837_I2C_REASON_ERROR_CLKT;
+	    return BCM2837_I2C_REASON_ERROR_CLKT;
     }
 
-    /* Not all data is received */
-    else if (remaining)
-    {
-	reason = BCM2837_I2C_REASON_ERROR_DATA;
-    }
-
-    bcm2837_peri_set_bits(status, BCM2837_BSC_S_DONE , BCM2837_BSC_S_DONE);
-
-    return reason;
+    return (int) len - remaining;
 }
 
 /* Read an number of bytes from I2C sending a repeated start after writing
@@ -228,7 +215,6 @@ uint8_t bcm2837_i2c_read_register_rs(char* regaddr, char* buf, uint32_t len)
     volatile uint32_t* control = bcm2837_bsc + BCM2837_BSC_C/4;
 	uint32_t remaining = len;
     uint32_t i = 0;
-    uint8_t reason = BCM2837_I2C_REASON_OK;
     
     /* Clear FIFO */
     bcm2837_peri_set_bits(control, BCM2837_BSC_C_CLEAR_1 , BCM2837_BSC_C_CLEAR_1 );
@@ -268,7 +254,7 @@ uint8_t bcm2837_i2c_read_register_rs(char* regaddr, char* buf, uint32_t len)
 	    remaining--;
     	}
     }
-    
+
     /* transfer has finished - grab any remaining stuff in FIFO */
     while (remaining && (bcm2837_peri_read(status) & BCM2837_BSC_S_RXD))
     {
@@ -277,28 +263,22 @@ uint8_t bcm2837_i2c_read_register_rs(char* regaddr, char* buf, uint32_t len)
         i++;
         remaining--;
     }
+    bcm2837_peri_set_bits(control, BCM2837_BSC_S_DONE , BCM2837_BSC_S_DONE);
     
     /* Received a NACK */
     if (bcm2837_peri_read(status) & BCM2837_BSC_S_ERR)
     {
-		reason = BCM2837_I2C_REASON_ERROR_NACK;
+		return BCM2837_I2C_REASON_ERROR_NACK;
     }
 
     /* Received Clock Stretch Timeout */
-    else if (bcm2837_peri_read(status) & BCM2837_BSC_S_CLKT)
+    if (bcm2837_peri_read(status) & BCM2837_BSC_S_CLKT)
     {
-	reason = BCM2837_I2C_REASON_ERROR_CLKT;
+	    return BCM2837_I2C_REASON_ERROR_CLKT;
     }
 
-    /* Not all data is sent */
-    else if (remaining)
-    {
-	reason = BCM2837_I2C_REASON_ERROR_DATA;
-    }
 
-    bcm2837_peri_set_bits(control, BCM2837_BSC_S_DONE , BCM2837_BSC_S_DONE);
-
-    return reason;
+    return (int) len-remaining;
 }
 
 /* Sending an arbitrary number of bytes before issuing a repeated start 
@@ -312,8 +292,7 @@ uint8_t bcm2837_i2c_write_read_rs(char* cmds, uint32_t cmds_len, char* buf, uint
     volatile uint32_t* control = bcm2837_bsc + BCM2837_BSC_C/4;
     uint32_t remaining = cmds_len;
     uint32_t i = 0;
-    uint8_t reason = BCM2837_I2C_REASON_OK;
-    
+   
     /* Clear FIFO */
     bcm2837_peri_set_bits(control, BCM2837_BSC_C_CLEAR_1 , BCM2837_BSC_C_CLEAR_1 );
 
@@ -373,35 +352,29 @@ uint8_t bcm2837_i2c_write_read_rs(char* cmds, uint32_t cmds_len, char* buf, uint
         i++;
         remaining--;
     }
-    
+    bcm2837_peri_set_bits(control, BCM2837_BSC_S_DONE , BCM2837_BSC_S_DONE);
     /* Received a NACK */
     if (bcm2837_peri_read(status) & BCM2837_BSC_S_ERR)
     {
-	reason = BCM2837_I2C_REASON_ERROR_NACK;
+	    return BCM2837_I2C_REASON_ERROR_NACK;
     }
 
     /* Received Clock Stretch Timeout */
-    else if (bcm2837_peri_read(status) & BCM2837_BSC_S_CLKT)
+    if (bcm2837_peri_read(status) & BCM2837_BSC_S_CLKT)
     {
-	reason = BCM2837_I2C_REASON_ERROR_CLKT;
+	    return BCM2837_I2C_REASON_ERROR_CLKT;
     }
+ 
 
-    /* Not all data is sent */
-    else if (remaining)
-    {
-	reason = BCM2837_I2C_REASON_ERROR_DATA;
-    }
-
-    bcm2837_peri_set_bits(control, BCM2837_BSC_S_DONE , BCM2837_BSC_S_DONE);
-
-    return reason;
+    return (int) buf_len - remaining;
 }
 
  void bcm2837_delayMicroseconds(uint64_t dummyseconds)
   {
+      return;
       for(int i = 0; i < 10000; i++)
       {
-        __asm__("nop");          
+        __asm__("nop");
       }
 
   }

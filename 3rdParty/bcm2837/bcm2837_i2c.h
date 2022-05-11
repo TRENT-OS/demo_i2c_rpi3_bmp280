@@ -92,10 +92,9 @@ typedef enum
 */
 typedef enum
 {
-    BCM2837_I2C_REASON_OK           = 0x00,      /*!< Success */
-    BCM2837_I2C_REASON_ERROR_NACK    = 0x01,      /*!< Received a NACK */
-    BCM2837_I2C_REASON_ERROR_CLKT    = 0x02,      /*!< Received Clock Stretch Timeout */
-    BCM2837_I2C_REASON_ERROR_DATA    = 0x04       /*!< Not all data is sent / received */
+    BCM2837_I2C_REASON_OK           = 0,      /*!< Success */
+    BCM2837_I2C_REASON_ERROR_NACK    = -1,      /*!< Received a NACK */
+    BCM2837_I2C_REASON_ERROR_CLKT    = -2      /*!< Received Clock Stretch Timeout */
 } bcm2837I2CReasonCodes;
 
     /*! \defgroup i2c I2C access

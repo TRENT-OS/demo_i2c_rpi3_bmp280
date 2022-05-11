@@ -8,7 +8,7 @@
 
 
 #define RPi3
-#define I2C1
+#define I2C0
 
 /*! Base Address of the BSC0 registers */
 #define BCM2837_BSC0_BASE       0x205000
@@ -19,7 +19,7 @@
 #define BCM2837_CORE_CLK_HZ		250000000	/*!< 250 MHz */
 
 #ifdef RPi3
-#ifdef I2C1
+#ifdef I2C0
 /*SDA*/
 #define SDAPIN RPI_GPIO_P1_03
 #define SDAMODE BCM2837_GPIO_FSEL_ALT0
@@ -27,12 +27,14 @@
 #define SCLMODE BCM2837_GPIO_FSEL_ALT0
 #define I2C_BASE_ADDRESS BCM2837_BSC0_BASE  
 /*SDL*/
-#elif I2C2
+#else
+#ifdef I2C1
 #define SDAPIN RPI_V2_GPIO_P1_03
 #define SDAMODE BCM2837_GPIO_FSEL_ALT0
-#define SCLPIN RPI_GPIO_P1_05
+#define SCLPIN RPI_V2_GPIO_P1_05
 #define SCLMODE BCM2837_GPIO_FSEL_ALT0
 #define I2C_BASE_ADDRESS BCM2837_BSC1_BASE
+#endif
 #endif
 #endif
 

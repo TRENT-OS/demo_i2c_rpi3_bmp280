@@ -19,10 +19,14 @@ DeclareCAmkESComponent(
     I2CTest
     SOURCES
         i2c_test.c
-        3rdParty/bcm2837/bcm2837_gpio.c
-        3rdParty/bcm2837/bcm2837_i2c.c
+        component/i2c/3rdParty/bcm2837/bcm2837_gpio.c
+        component/i2c/3rdParty/bcm2837/bcm2837_i2c.c
+        component/i2c/i2c.c
+        component/i2c/src/plat/rpi3/rpi3_i2c.c
     INCLUDES
-        3rdParty/bcm2837
+        component/i2c/3rdParty/bcm2837
+        component/i2c/include/
+        component/i2c/include/plat/rpi3
     C_FLAGS
         -Wall
         -Werror

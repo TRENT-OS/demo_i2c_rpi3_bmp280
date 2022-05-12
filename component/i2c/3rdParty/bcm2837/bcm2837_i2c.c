@@ -6,6 +6,7 @@
 #include "bcm2837_i2c.h"
 #include <stddef.h>
 
+
 /* This variable allows us to test on hardware other than RPi.
 // It prevents access to the kernel memory, and does not do any peripheral access
 // Instead it prints out what it _would_ do if debug were 0
@@ -112,7 +113,6 @@ int bcm2837_i2c_write(const char * buf, uint32_t len)
         i++;
         remaining--;
     }
-    
     /* Enable device and start transfer */
     bcm2837_peri_write(control, BCM2837_BSC_C_I2CEN | BCM2837_BSC_C_ST);
     
@@ -142,7 +142,7 @@ int bcm2837_i2c_write(const char * buf, uint32_t len)
 	    return BCM2837_I2C_REASON_ERROR_CLKT;
     } 
 
-    return (int) len - remaining;
+    return (int) (len - remaining);
 }
 
 /* Read an number of bytes from I2C */
@@ -207,7 +207,7 @@ int bcm2837_i2c_read(char* buf, uint32_t len)
 /* Read an number of bytes from I2C sending a repeated start after writing
 // the required register. Only works if your device supports this mode
 */
-uint8_t bcm2837_i2c_read_register_rs(char* regaddr, char* buf, uint32_t len)
+int bcm2837_i2c_read_register_rs(char* regaddr, char* buf, uint32_t len)
 {   
     volatile uint32_t* dlen    = bcm2837_bsc + BCM2837_BSC_DLEN/4;
     volatile uint32_t* fifo    = bcm2837_bsc + BCM2837_BSC_FIFO/4;
@@ -284,7 +284,7 @@ uint8_t bcm2837_i2c_read_register_rs(char* regaddr, char* buf, uint32_t len)
 /* Sending an arbitrary number of bytes before issuing a repeated start 
 // (with no prior stop) and reading a response. Some devices require this behavior.
 */
-uint8_t bcm2837_i2c_write_read_rs(char* cmds, uint32_t cmds_len, char* buf, uint32_t buf_len)
+int bcm2837_i2c_write_read_rs(char* cmds, uint32_t cmds_len, char* buf, uint32_t buf_len)
 {   
     volatile uint32_t* dlen    = bcm2837_bsc + BCM2837_BSC_DLEN/4;
     volatile uint32_t* fifo    = bcm2837_bsc + BCM2837_BSC_FIFO/4;

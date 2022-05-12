@@ -144,7 +144,7 @@ typedef enum
       \param[in] len Number of bytes in the buf buffer, and the number of bytes to send.
       \return reason see \ref bcm2837I2CReasonCodes
     */
-    extern uint8_t bcm2837_i2c_write(const char * buf, uint32_t len);
+    extern int bcm2837_i2c_write(const char * buf, uint32_t len);
 
     /*! Transfers any number of bytes from the currently selected I2C slave.
       (as previously set by \sa bcm2837_i2c_setSlaveAddress)
@@ -152,7 +152,7 @@ typedef enum
       \param[in] len Number of bytes in the buf buffer, and the number of bytes to received.
       \return reason see \ref bcm2837I2CReasonCodes
     */
-    extern uint8_t bcm2837_i2c_read(char* buf, uint32_t len);
+    extern int bcm2837_i2c_read(char* buf, uint32_t len);
 
     /*! Allows reading from I2C slaves that require a repeated start (without any prior stop)
       to read after the required slave register has been set. For example, the popular
@@ -168,7 +168,7 @@ typedef enum
       \param[in] len Number of bytes in the buf buffer, and the number of bytes to received.
       \return reason see \ref bcm2837I2CReasonCodes
     */
-    extern uint8_t bcm2837_i2c_read_register_rs(char* regaddr, char* buf,
+    extern int bcm2837_i2c_read_register_rs(char* regaddr, char* buf,
                                                 uint32_t len);
 
     /*! Allows sending an arbitrary number of bytes to I2C slaves before issuing a repeated
@@ -181,7 +181,7 @@ typedef enum
       \param[in] buf_len Number of bytes to receive in the buf buffer.
       \return reason see \ref bcm2837I2CReasonCodes
     */
-    extern uint8_t bcm2837_i2c_write_read_rs(char* cmds, uint32_t cmds_len,
+    extern int bcm2837_i2c_write_read_rs(char* cmds, uint32_t cmds_len,
                                              char* buf, uint32_t buf_len);
 
     /*! @} */

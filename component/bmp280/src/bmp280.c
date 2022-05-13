@@ -23,10 +23,12 @@
  */
 #include <stddef.h>
 #include "bmp280.h"
+#include "lib_debug/Debug.h"
+
 
 #ifdef BMP280_DEBUG
-#include <stdio.h>
-#define debug(fmt, ...) printf("%s" fmt "\n", "bmp280: ", ## __VA_ARGS__);
+//#include <stdio.h>
+#define debug(fmt, ...) Debug_LOG_INFO("%s" fmt "\n", "bmp280: ", ## __VA_ARGS__);
 #else
 #define debug(fmt, ...)
 #endif
@@ -54,6 +56,49 @@
 
 #define BMP280_RESET_VALUE     0xB6
 
+//---------------------------------------------------------------------
+// Glue Code Modifications, HENSOLDT Cyber
+//---------------------------------------------------------------------
+
+int i2c_slave_read(uint8_t bus, uint8_t slave_addr, const uint8_t * data, uint8_t *buf, uint32_t len)
+{
+    size_t tmp = 0;
+
+    int ret = i2c_write((slave_addr << 1), 1, &tmp, data);
+    if( ret != I2C_SUCCESS)
+    {
+        Debug_LOG_ERROR("i2c_write() returned error %d, written were %d bytes", ret, tmp);
+        return ret;
+    }
+    ret = i2c_read((slave_addr << 1), len, &tmp, buf);
+    if(ret != I2C_SUCCESS)
+    {
+       Debug_LOG_ERROR("i2c_read() returned error %d, read were %d bytes", ret, tmp);
+       return ret; 
+    }
+    return ret;
+}
+
+
+static int write_register8(i2c_dev_t *dev, uint8_t addr, uint8_t value)
+{
+    size_t tmp = 0;
+    uint8_t buf[2];
+    buf[0] = addr;
+    buf[1] = value;
+
+    int ret = i2c_write((dev->addr) << 1, 2, &tmp, buf);
+    if(ret != I2C_SUCCESS)
+    {
+        Debug_LOG_ERROR("i2c_write() returned %d, written were %d bytes", ret, tmp);
+        return ret;
+    }
+    return ret;
+}
+
+//----------------------------------------------------------------------
+// End of Glue Code
+//----------------------------------------------------------------------
 
 void bmp280_init_default_params(bmp280_params_t *params)
 {
@@ -141,10 +186,6 @@ static bool read_hum_calibration_data(bmp280_t *dev)
     return false;
 }
 
-static int write_register8(i2c_dev_t *dev, uint8_t addr, uint8_t value)
-{
-    return i2c_slave_write(dev->bus, dev->addr, &addr, &value, 1);
-}
 
 bool bmp280_init(bmp280_t *dev, bmp280_params_t *params)
 {

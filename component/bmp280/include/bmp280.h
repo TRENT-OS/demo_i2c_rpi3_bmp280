@@ -26,7 +26,7 @@
 
 #include <stdint.h>
 #include <stdbool.h>
-#include "i2c/i2c.h"
+#include "i2c.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -105,6 +105,11 @@ typedef struct {
     BMP280_StandbyTime standby;
 } bmp280_params_t;
 
+typedef struct
+{
+  uint8_t bus;
+  uint8_t addr;
+} i2c_dev_t;
 
 typedef struct {
     uint16_t dig_T1;

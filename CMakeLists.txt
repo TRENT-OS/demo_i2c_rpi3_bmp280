@@ -23,10 +23,12 @@ DeclareCAmkESComponent(
         component/i2c/3rdParty/bcm2837/bcm2837_i2c.c
         component/i2c/i2c.c
         component/i2c/src/plat/rpi3/rpi3_i2c.c
+        component/bmp280/src/bmp280.c
     INCLUDES
         component/i2c/3rdParty/bcm2837
         component/i2c/include/
         component/i2c/include/plat/rpi3
+        component/bmp280/include
     C_FLAGS
         -Wall
         -Werror

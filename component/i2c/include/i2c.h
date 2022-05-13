@@ -23,7 +23,7 @@ I2C_Error_t;
 void i2c_init(void);
 
 
-I2C_Error_t i2c_write(int dev, size_t len, size_t *written, uint8_t* buf);
+I2C_Error_t i2c_write(int dev, size_t len, size_t *written, const uint8_t* buf);
 
 
-I2C_Error_t i2c_read(int dev, size_t len, size_t *read, uint8_t* buf);
+I2C_Error_t i2c_read(int dev, size_t len, size_t *read, const uint8_t* buf);

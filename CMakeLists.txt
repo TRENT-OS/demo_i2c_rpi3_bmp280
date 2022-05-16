@@ -12,6 +12,11 @@ os_set_config_file(
     CONFIG_PROJECT_NAME "system_config"
 )
 
+#        component/ssd1306/src/ssd1306.c
+#        component/ssd1306/src/ssd1306_fonts.c
+
+#        component/ssd1306/src
+
 #-------------------------------------------------------------------------------
 project(i2c_test C)
 
@@ -24,11 +29,15 @@ DeclareCAmkESComponent(
         component/i2c/i2c.c
         component/i2c/src/plat/rpi3/rpi3_i2c.c
         component/bmp280/src/bmp280.c
+        component/ssd1306/3rdParty/ssd1306/ssd1306.c
+        component/ssd1306/3rdParty/fonts/fonts.c
     INCLUDES
         component/i2c/3rdParty/bcm2837
         component/i2c/include/
         component/i2c/include/plat/rpi3
         component/bmp280/include
+        component/ssd1306/3rdParty/ssd1306
+        component/ssd1306/3rdParty/fonts
     C_FLAGS
         -Wall
         -Werror

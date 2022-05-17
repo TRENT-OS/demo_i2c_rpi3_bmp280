@@ -26,7 +26,7 @@
 
 #include <stdint.h>
 #include <stdbool.h>
-#include "i2c.h"
+#include "i2c_lib.h"
 
 #ifdef __cplusplus
 extern "C" {

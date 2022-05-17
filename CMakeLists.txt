@@ -18,26 +18,25 @@ os_set_config_file(
 #        component/ssd1306/src
 
 #-------------------------------------------------------------------------------
-project(i2c_test C)
 
+
+project(i2c_test C)
+include(${CMAKE_CURRENT_SOURCE_DIR}/components/i2c/CMakeLists.txt)
+DeclareCAmkESComponents_for_I2Cs()
+I2C_DeclareCAmkESComponent(I2CDriver)
 DeclareCAmkESComponent(
     I2CTest
     SOURCES
         i2c_test.c
-        component/i2c/3rdParty/bcm2837/bcm2837_gpio.c
-        component/i2c/3rdParty/bcm2837/bcm2837_i2c.c
-        component/i2c/i2c.c
-        component/i2c/src/plat/rpi3/rpi3_i2c.c
-        component/bmp280/src/bmp280.c
-        component/ssd1306/3rdParty/ssd1306/ssd1306.c
-        component/ssd1306/3rdParty/fonts/fonts.c
+        components/bmp280/src/bmp280.c
+        components/ssd1306/3rdParty/ssd1306/ssd1306.c
+        components/ssd1306/3rdParty/fonts/fonts.c
+        i2c_lib.c
     INCLUDES
-        component/i2c/3rdParty/bcm2837
-        component/i2c/include/
-        component/i2c/include/plat/rpi3
-        component/bmp280/include
-        component/ssd1306/3rdParty/ssd1306
-        component/ssd1306/3rdParty/fonts
+        components/bmp280/include
+        components/ssd1306/3rdParty/ssd1306
+        components/ssd1306/3rdParty/fonts
+        components/i2c/include
     C_FLAGS
         -Wall
         -Werror

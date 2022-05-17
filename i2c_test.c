@@ -148,8 +148,6 @@ OS_Error_t run(void)
     OS_Error_t err = OS_SUCCESS;
     I2C_Error_t i2c_err = I2C_SUCCESS;
     size_t tmp = 0;
-
-    i2c_init();
     
     uint8_t buf[20];
     buf[0] = 0xd0;

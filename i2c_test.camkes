@@ -12,49 +12,44 @@ import <std_connector.camkes>;
 
 #include "system_config.h"
 
+#include "components/i2c/i2c.camkes"
+
+I2C_MEMORY_COMPONENT_DEFINE(I2CDriver)
+
+
+I2C_HARDWARE_COMPONENTS(I2CDriverHw)
+
   component I2CTest {
     control;
-    dataport Buf(0x1000)    regBase;
-    dataport Buf(0x1000)    gpioBase;
-  }
-  component I2C_HW {
-      hardware;
-      dataport Buf(0x1000)    regBase;
-      dataport Buf(0x1000)    gpioBase;
+
+    uses        if_I2C              i2c_rpc;
+    dataport    Buf                 i2c_port;
+
   }
   assembly {
       composition {
-          //-------------------------------
-          // I2C
-          //-------------------------------
+        //-------------------------------
+        // I2C
+        //-------------------------------
 
-          component I2CTest i2ctest;
-          component I2C_HW  i2c_hw;
-        //  component GPIO_HW gpio_hw;
+        component I2CTest i2ctest;
 
-          connection seL4HardwareMMIO 
-              i2ctest_mmio (
-                  from i2ctest.regBase,
-                  to i2c_hw.regBase,
-              );
-           connection seL4HardwareMMIO
-              i2ctest_gpio_mmio (
-                   from i2ctest.gpioBase,
-                   to i2c_hw.gpioBase
-              );
-          /*connection seL4HardwareMMIO
-              i2ctest_gpio_mmio (
-                  from i2ctest.gpioBase,
-                  to gpio_hw.gpioBase
-              );*/
-      }
+        component I2CDriver  i2cdriver;
+        component I2CDriverHw i2cdriverhw;
 
+        I2C_INSTANCE_CONNECT_CLIENT(
+            i2cdriver,
+            i2ctest.i2c_rpc, i2ctest.i2c_port
+        )
+        I2C_HARDWARE_INSTANCE_CONNECT(
+            i2cdriver,
+            i2cdriverhw
+        )
+    }
       configuration {
-          i2c_hw.regBase_paddr = 0x3F205000;
-          i2c_hw.regBase_size = 0x1000;
-          i2c_hw.gpioBase_paddr = 0x3F200000;
-          i2c_hw.gpioBase_size = 0x1000;
-        /*  gpio_hw.gpioBase_paddr = 0x3F200000;
-          gpio_hw.gpioBase_size = 0x1000;*/
-      }
+        I2C_HARDWARE_INSTANCE_CONFIGURE_SELF(
+            i2cdriverhw,
+            I2C0_ADDR)
+    }
+
   }

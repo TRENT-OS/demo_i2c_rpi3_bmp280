@@ -22,14 +22,14 @@ static volatile uint32_t* bcm2837_bsc = NULL;
 
 void bcm2837_delayMicroseconds(uint64_t dummyseconds);
 
-int bcm2837_i2c_begin(void* vaddr)
+int bcm2837_i2c_begin(void* vaddr, void* gpio_vaddr)
 {
 //TODO Allow for both I2C to be used with outside Define!
     uint16_t cdiv = 0;
     volatile uint32_t* paddr = NULL;
 
-    bcm2837_gpio_init(vaddr);
-    bcm2837_bsc = (uint32_t*)(vaddr + (I2C_BASE_ADDRESS - BCM2837_GPIO_BASE)); //TODO look up if correct
+    bcm2837_gpio_init(gpio_vaddr);
+    bcm2837_bsc = (uint32_t*)(vaddr);
     
     /* Set the I2C/BSC pins to enable I2C access on them */
     bcm2837_gpio_fsel(SDAPIN, SDAMODE); /* SDA */

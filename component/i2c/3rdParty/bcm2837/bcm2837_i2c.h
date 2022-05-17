@@ -111,7 +111,7 @@ typedef enum
       \return 1 if successful, 0 otherwise (perhaps because you are not running as root)
       \sa  bcm2837_i2c_end()
     */
-    extern int bcm2837_i2c_begin(void* vaddr);
+    extern int bcm2837_i2c_begin(void* vaddr, void* gpio_vaddr);
 
     /*! End I2C operations.
       I2C pins P1-03 (SDA) and P1-05 (SCL)

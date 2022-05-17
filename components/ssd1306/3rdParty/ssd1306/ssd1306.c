@@ -89,25 +89,18 @@
 #if (SSD1306_I2C_SUPPORT)
 static int inline i2c_send(const ssd1306_t *dev, uint8_t reg, uint8_t* data, uint8_t len)
 {
-    uint8_t buf[17]; // Larges data package send by this library are 17 bytes
     I2C_Error_t err;
     size_t written;
     
-    buf[0] = reg;
-    for(int i = 0; i < len; i++)
-    {
-        buf[i+1] = *(data + i);
-    }
-
     
-    err = i2c_write((dev->i2c_dev.addr)<<1, len + 1, &written, buf );
+    err = i2c_write_reg((dev->i2c_dev.addr)<<1, reg, len, &written, data );
     if(err != I2C_SUCCESS)
     {
         Debug_LOG_ERROR("i2c_write() returned error %d", err);
         return -1;
     }
 
-    return len - written + 1;
+    return len - written;
     //return i2c_slave_write(dev->i2c_dev.bus, dev->i2c_dev.addr, &reg, data, len);
 }
 #endif

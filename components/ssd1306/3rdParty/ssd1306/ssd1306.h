@@ -20,7 +20,7 @@
 
 // shifted
 #if (SSD1306_I2C_SUPPORT)
-    #include <i2c.h>
+    #include <i2c_lib.h>
     #define SSD1306_I2C_ADDR_0    (0x3C)
     #define SSD1306_I2C_ADDR_1    (0x3D)
 #endif

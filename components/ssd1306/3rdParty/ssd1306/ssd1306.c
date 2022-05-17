@@ -107,7 +107,7 @@ static int inline i2c_send(const ssd1306_t *dev, uint8_t reg, uint8_t* data, uin
         return -1;
     }
 
-    return len - written - 1;
+    return len - written + 1;
     //return i2c_slave_write(dev->i2c_dev.bus, dev->i2c_dev.addr, &reg, data, len);
 }
 #endif

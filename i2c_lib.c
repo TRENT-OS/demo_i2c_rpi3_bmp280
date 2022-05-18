@@ -12,6 +12,33 @@
 
 OS_Dataport_t port_storage = OS_DATAPORT_ASSIGN(i2c_port);
 
+I2C_Error_t i2c_mutex_lock(void)
+{
+    I2C_Error_t ret;
+    while(1)
+    {
+        ret = i2c_rpc_mutex_try_lock();
+        if(ret == I2C_SUCCESS)
+        {
+            // Successfully got mutex
+            break;
+        }
+        if(ret != I2C_ERROR_MUTEX_LOCKED)
+        {
+            Debug_LOG_ERROR("i2c_rpc_mutex_try_lock() returned %d", ret);
+            return ret;
+        }
+        i2cBus_notify_wait();
+    }
+    return ret;
+}
+
+I2C_Error_t i2c_mutex_unlock(void)
+{
+    return i2c_rpc_mutex_unlock();
+}
+
+
 I2C_Error_t i2c_write(int dev, size_t len, size_t *written, const uint8_t* buf)
 {
     return i2c_write_reg(dev, -1, len, written, buf);
@@ -24,6 +51,12 @@ I2C_Error_t i2c_write_reg(int dev, int reg, size_t len, size_t *written, const u
     size_t i2c_buf_offset = 0;
     *written = 0;
 
+    I2C_Error_t ret = i2c_mutex_lock();
+    if(ret != I2C_SUCCESS)
+    {
+        Debug_LOG_ERROR("I2C_mutex_lock() returned error %d", ret);
+        return ret;
+    }
     // On the I2C bus the LSB bit is the read/write flag. We expect
     // the last bit to be a zero
     if((dev & 1) != 0)
@@ -67,12 +100,13 @@ I2C_Error_t i2c_write_reg(int dev, int reg, size_t len, size_t *written, const u
     }*/
 
     memcpy(&(i2c_buf[i2c_buf_offset]),buf, len);
-    I2C_Error_t ret = i2c_rpc_write(dev, len + i2c_buf_offset, written);
+    ret = i2c_rpc_write(dev, len + i2c_buf_offset, written);
     if (ret != I2C_SUCCESS)
     {
         Debug_LOG_ERROR("i2c_write_reg() returned error %d", ret);
     }
     *written = *written - i2c_buf_offset;
+    i2c_mutex_unlock();
     return ret;
 }
 
@@ -81,6 +115,13 @@ I2C_Error_t i2c_read(int dev, size_t len, size_t *read, uint8_t* buf)
     uint8_t* i2c_buf = OS_Dataport_getBuf(port_storage);
     size_t i2c_buf_size = OS_Dataport_getSize(port_storage);
     *read = 0;
+
+    I2C_Error_t ret = i2c_mutex_lock();
+    if(ret != I2C_SUCCESS)
+    {
+        Debug_LOG_ERROR("i2c_mutex_loc() returned error %d", ret);
+        return ret;
+    }
 
     // On the I2C bus the LSB bit is the read/write flag. We expect
     // the last bit to be a zero
@@ -103,7 +144,7 @@ I2C_Error_t i2c_read(int dev, size_t len, size_t *read, uint8_t* buf)
         return I2C_ERROR_INVALID_PARAMETER;
     }
 
-    I2C_Error_t ret = i2c_rpc_read(dev, len, read);
+    ret = i2c_rpc_read(dev, len, read);
     if( ret != I2C_SUCCESS)
     {
         Debug_LOG_ERROR("I2C_read_reg() returned %d", ret);
@@ -120,5 +161,6 @@ I2C_Error_t i2c_read(int dev, size_t len, size_t *read, uint8_t* buf)
         buf[i] = i2c_buf[i];
     }*/
     memcpy(buf, i2c_buf, len);
+    i2c_mutex_unlock();
     return ret;
 }

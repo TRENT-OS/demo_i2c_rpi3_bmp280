@@ -6,6 +6,12 @@
     include "i2c.h";
     include "stdint.h";
 
+
+    I2C_Error_t mutex_try_lock(void);
+
+
+    I2C_Error_t mutex_unlock(void);
+
     /**
     * @brief Initialize I2C interface to specific slave device.
     *

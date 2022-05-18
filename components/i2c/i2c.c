@@ -19,20 +19,53 @@
 static struct 
 {
     bool    init_ok;
+    int mutex;
     OS_Dataport_t   port_storage;
 } ctx =
 {
+    .mutex = 0,
     .init_ok = false,
     .port_storage = OS_DATAPORT_ASSIGN(i2c_port)
 };
 
+void notify_unlock(void);
+
+void notify_unlock(void)
+{
+    i2cBus_notify1_emit();
+    i2cBus_notify2_emit();
+    i2cBus_notify3_emit();
+}
+
+I2C_Error_t i2c_rpc_mutex_try_lock(void)
+{
+    if(!ctx.init_ok)
+    {
+        Debug_LOG_ERROR("I2C is not yet initialised");
+        return I2C_ERROR_NOT_INITIALISED;
+    }
+    if(ctx.mutex == 0)
+    {
+        ctx.mutex = 1;
+        return I2C_SUCCESS;
+    }
+    return I2C_ERROR_MUTEX_LOCKED;
+}
+
+I2C_Error_t i2c_rpc_mutex_unlock(void)
+{
+    if(!ctx.init_ok)
+    {
+        Debug_LOG_ERROR("I2C is not yet initialised");
+        return I2C_ERROR_NOT_INITIALISED;
+    }
+    ctx.mutex = 0;
+    notify_unlock();
+    return I2C_SUCCESS;
+}
+
 void post_init(void);
 
-/*void i2c_init(void)
-{
-    post_init();
-}
-*/
 void post_init(void)
 {
     Debug_LOG_DEBUG("[%s] %s", get_instance_name(), __func__);
@@ -43,6 +76,7 @@ void post_init(void)
     }
 
     ctx.init_ok = true;
+    ctx.mutex = 0;
     Debug_LOG_INFO("%s done", get_instance_name());
 }
 

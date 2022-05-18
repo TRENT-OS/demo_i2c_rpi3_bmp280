@@ -19,6 +19,10 @@ import <std_connector.camkes>;
 _inst_) \
 component _inst_ { \
     \
+    emits I2CUnlock      i2cBus_notify1; \
+    emits I2CUnlock      i2cBus_notify2; \
+    emits I2CUnlock      i2cBus_notify3; \
+\
     provides if_I2C     i2c_rpc; \
     dataport Buf        i2c_port; \
     \
@@ -29,7 +33,9 @@ component _inst_ { \
 #define I2C_INSTANCE_CONNECT_CLIENT( \
     _inst_, \
     _peer_inst_rpc_, \
-    _peer_inst_port_) \
+    _peer_inst_port_, \
+    _evt_, \
+    _num_) \
     \
     connection  seL4RPCCall \
         _inst_ ## _i2c_rpc( \
@@ -39,5 +45,9 @@ component _inst_ { \
     connection  seL4SharedData \
         _inst_ ## _storage_port( \
             from _peer_inst_port_, \
-            to   _inst_.i2c_port);
+            to   _inst_.i2c_port); \
+    connection seL4NotificationNative \
+        _inst_ ## _evt##_num_ (\
+        from _inst_.i2cBus_notify ## _num_,\
+        to  _evt_);
 

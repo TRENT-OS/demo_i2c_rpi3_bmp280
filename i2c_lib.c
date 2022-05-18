@@ -6,18 +6,19 @@
 #include <string.h>
 
 #include "i2c_lib.h"
+#include "i2c.h"
 
 #include <camkes.h>
 
 
-OS_Dataport_t port_storage = OS_DATAPORT_ASSIGN(i2c_port);
+//OS_Dataport_t port_storage = OS_DATAPORT_ASSIGN(i2c_port);
 
-I2C_Error_t i2c_mutex_lock(void)
+I2C_Error_t i2c_mutex_lock(const if_I2C_t* bus)
 {
     I2C_Error_t ret;
     while(1)
     {
-        ret = i2c_rpc_mutex_try_lock();
+        ret = bus->mutex_try_lock();
         if(ret == I2C_SUCCESS)
         {
             // Successfully got mutex
@@ -28,30 +29,30 @@ I2C_Error_t i2c_mutex_lock(void)
             Debug_LOG_ERROR("i2c_rpc_mutex_try_lock() returned %d", ret);
             return ret;
         }
-        i2cBus_notify_wait();
+        bus->notify_wait();
     }
     return ret;
 }
 
-I2C_Error_t i2c_mutex_unlock(void)
+I2C_Error_t i2c_mutex_unlock(const if_I2C_t* bus)
 {
-    return i2c_rpc_mutex_unlock();
+    return bus->mutex_unlock();
 }
 
 
-I2C_Error_t i2c_write(int dev, size_t len, size_t *written, const uint8_t* buf)
+I2C_Error_t i2c_write(const if_I2C_t* bus,int dev, size_t len, size_t *written, const uint8_t* buf)
 {
-    return i2c_write_reg(dev, -1, len, written, buf);
+    return i2c_write_reg(bus, dev, -1, len, written, buf);
 }
 
-I2C_Error_t i2c_write_reg(int dev, int reg, size_t len, size_t *written, const uint8_t* buf)
+I2C_Error_t i2c_write_reg(const if_I2C_t* bus, int dev, int reg, size_t len, size_t *written, const uint8_t* buf)
 {
-    uint8_t* i2c_buf = OS_Dataport_getBuf(port_storage);
-    size_t i2c_buf_size = OS_Dataport_getSize(port_storage);
+    uint8_t* i2c_buf = OS_Dataport_getBuf(bus->port_storage);
+    size_t i2c_buf_size = OS_Dataport_getSize(bus->port_storage);
     size_t i2c_buf_offset = 0;
     *written = 0;
 
-    I2C_Error_t ret = i2c_mutex_lock();
+    I2C_Error_t ret = i2c_mutex_lock(bus);
     if(ret != I2C_SUCCESS)
     {
         Debug_LOG_ERROR("I2C_mutex_lock() returned error %d", ret);
@@ -100,23 +101,23 @@ I2C_Error_t i2c_write_reg(int dev, int reg, size_t len, size_t *written, const u
     }*/
 
     memcpy(&(i2c_buf[i2c_buf_offset]),buf, len);
-    ret = i2c_rpc_write(dev, len + i2c_buf_offset, written);
+    ret = bus->write(dev, len + i2c_buf_offset, written);
     if (ret != I2C_SUCCESS)
     {
         Debug_LOG_ERROR("i2c_write_reg() returned error %d", ret);
     }
     *written = *written - i2c_buf_offset;
-    i2c_mutex_unlock();
+    i2c_mutex_unlock(bus);
     return ret;
 }
 
-I2C_Error_t i2c_read(int dev, size_t len, size_t *read, uint8_t* buf)
+I2C_Error_t i2c_read(const if_I2C_t* bus, int dev, size_t len, size_t *read, uint8_t* buf)
 {
-    uint8_t* i2c_buf = OS_Dataport_getBuf(port_storage);
-    size_t i2c_buf_size = OS_Dataport_getSize(port_storage);
+    uint8_t* i2c_buf = OS_Dataport_getBuf(bus->port_storage);
+    size_t i2c_buf_size = OS_Dataport_getSize(bus->port_storage);
     *read = 0;
 
-    I2C_Error_t ret = i2c_mutex_lock();
+    I2C_Error_t ret = i2c_mutex_lock(bus);
     if(ret != I2C_SUCCESS)
     {
         Debug_LOG_ERROR("i2c_mutex_loc() returned error %d", ret);
@@ -144,7 +145,7 @@ I2C_Error_t i2c_read(int dev, size_t len, size_t *read, uint8_t* buf)
         return I2C_ERROR_INVALID_PARAMETER;
     }
 
-    ret = i2c_rpc_read(dev, len, read);
+    ret = bus->read(dev, len, read);
     if( ret != I2C_SUCCESS)
     {
         Debug_LOG_ERROR("I2C_read_reg() returned %d", ret);
@@ -161,6 +162,6 @@ I2C_Error_t i2c_read(int dev, size_t len, size_t *read, uint8_t* buf)
         buf[i] = i2c_buf[i];
     }*/
     memcpy(buf, i2c_buf, len);
-    i2c_mutex_unlock();
+    i2c_mutex_unlock(bus);
     return ret;
 }

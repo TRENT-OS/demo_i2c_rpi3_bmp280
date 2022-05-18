@@ -5,6 +5,7 @@
 
 #include <stdint.h>
 #include <stddef.h>
+#include "OS_Dataport.h"
 
 typedef enum {
     I2C_ERROR_TRY_AGAIN = -9,
@@ -21,3 +22,26 @@ typedef enum {
     I2C_SUCCESS
 }
 I2C_Error_t;
+
+typedef struct
+{
+    OS_Dataport_t port_storage;
+    I2C_Error_t (*write)(int dev, size_t len, size_t* write);
+    I2C_Error_t (*read)(int dev, size_t len, size_t* read);
+    I2C_Error_t (*mutex_try_lock)(void);
+    I2C_Error_t (*mutex_unlock)(void);
+    I2C_Error_t (*init_slave)(int dev);
+    void (*notify_wait)(void);
+} if_I2C_t;
+
+#define IF_I2C_ASSIGN(_rpc_, _port_, _evt_)    \
+{                                              \
+    .port_storage = OS_DATAPORT_ASSIGN(_port_), \
+    .write = _rpc_ ## _write,                  \
+    .read  = _rpc_ ##_read,                    \
+    .mutex_try_lock = _rpc_ ## _mutex_try_lock,\
+    .mutex_unlock = _rpc_ ## _mutex_unlock,    \
+    .init_slave = _rpc_ ## _init_slave,        \
+    .notify_wait = _evt_ ## _wait,             \
+}
+

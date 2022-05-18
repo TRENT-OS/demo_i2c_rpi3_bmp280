@@ -148,11 +148,12 @@ OS_Error_t run(void)
     OS_Error_t err = OS_SUCCESS;
     I2C_Error_t i2c_err = I2C_SUCCESS;
     size_t tmp = 0;
-    
+
+    if_I2C_t bus = IF_I2C_ASSIGN(i2c_rpc, i2c_port, i2cBus_notify);    
     uint8_t buf[20];
     buf[0] = 0xd0;
 
-    i2c_err = i2c_write(DEVICE, 1, &tmp, buf);
+    i2c_err = i2c_write(&bus, DEVICE, 1, &tmp, buf);
     if(i2c_err != I2C_SUCCESS)
     {
         Debug_LOG_ERROR("i2c_write() returned errorcode %d", i2c_err);
@@ -160,7 +161,7 @@ OS_Error_t run(void)
         return err;
     }
 
-    i2c_err = i2c_write(DEVICE, 1, &tmp, buf);
+    i2c_err = i2c_write(&bus, DEVICE, 1, &tmp, buf);
     if(i2c_err != I2C_SUCCESS)
     {
         Debug_LOG_ERROR("i2c_read() returned errorcode %d", i2c_err);
@@ -170,7 +171,7 @@ OS_Error_t run(void)
 
     Debug_LOG_INFO("ID of bmp280 is 0x%x", buf[0]);
     buf[0] = 0xf4;
-     i2c_err = i2c_write(DEVICE, 1, &tmp, buf);
+     i2c_err = i2c_write(&bus, DEVICE, 1, &tmp, buf);
     if(i2c_err != I2C_SUCCESS)
     {
         Debug_LOG_ERROR("i2c_write() returned errorcode %d", i2c_err);
@@ -178,7 +179,7 @@ OS_Error_t run(void)
         return err;
     }
 
-    i2c_err = i2c_write(DEVICE, 1, &tmp, buf);
+    i2c_err = i2c_write(&bus, DEVICE, 1, &tmp, buf);
     if(i2c_err != I2C_SUCCESS)
     {
         Debug_LOG_ERROR("i2c_read() returned errorcode %d", i2c_err);

@@ -107,7 +107,7 @@ typedef struct {
 
 typedef struct
 {
-  uint8_t bus;
+  if_I2C_t bus;
   uint8_t addr;
 } i2c_dev_t;
 

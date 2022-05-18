@@ -193,9 +193,10 @@ OS_Error_t run(void)
 
     bmp280_init_default_params(&params);
 
-    bmp280_t bmp280_dev;
-    bmp280_dev.i2c_dev.bus = 0;
-    bmp280_dev.i2c_dev.addr = BMP280_I2C_ADDRESS_0;
+    bmp280_t bmp280_dev = {
+    .i2c_dev.bus = IF_I2C_ASSIGN(i2c_rpc, i2c_port, i2cBus_notify),
+    .i2c_dev.addr = BMP280_I2C_ADDRESS_0,
+    };
 
     bmp280_init(&bmp280_dev, &params);
     Debug_LOG_INFO("BMP280 Initialised, now readout some data");

@@ -60,17 +60,17 @@
 // Glue Code Modifications, HENSOLDT Cyber
 //---------------------------------------------------------------------
 
-int i2c_slave_read(uint8_t bus, uint8_t slave_addr, const uint8_t * data, uint8_t *buf, uint32_t len)
+int i2c_slave_read(if_I2C_t bus, uint8_t slave_addr, const uint8_t * data, uint8_t *buf, uint32_t len)
 {
     size_t tmp = 0;
 
-    int ret = i2c_write((slave_addr << 1), 1, &tmp, data);
+    int ret = i2c_write(&bus ,(slave_addr << 1), 1, &tmp, data);
     if( ret != I2C_SUCCESS)
     {
         Debug_LOG_ERROR("i2c_write() returned error %d, written were %d bytes", ret, tmp);
         return ret;
     }
-    ret = i2c_read((slave_addr << 1), len, &tmp, buf);
+    ret = i2c_read(&bus ,(slave_addr << 1), len, &tmp, buf);
     if(ret != I2C_SUCCESS)
     {
        Debug_LOG_ERROR("i2c_read() returned error %d, read were %d bytes", ret, tmp);
@@ -87,7 +87,7 @@ static int write_register8(i2c_dev_t *dev, uint8_t addr, uint8_t value)
     buf[0] = addr;
     buf[1] = value;
 
-    int ret = i2c_write((dev->addr) << 1, 2, &tmp, buf);
+    int ret = i2c_write( &(dev->bus),(dev->addr) << 1, 2, &tmp, buf);
     if(ret != I2C_SUCCESS)
     {
         Debug_LOG_ERROR("i2c_write() returned %d, written were %d bytes", ret, tmp);

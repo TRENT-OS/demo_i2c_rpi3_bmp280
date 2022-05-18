@@ -208,7 +208,7 @@ OS_Error_t run(void)
     ssd1306_t ssd1306_dev = {
         .protocol = SSD1306_PROTO_I2C,
         .screen = SSD1306_SCREEN,
-        .i2c_dev.bus = 0,
+        .i2c_dev.bus = IF_I2C_ASSIGN(i2c_rpc, i2c_port, i2cBus_notify),
         .i2c_dev.addr = SSD1306_I2C_ADDR_0,
         .width = DISPLAY_WIDTH,
         .height = DISPLAY_HEIGHT

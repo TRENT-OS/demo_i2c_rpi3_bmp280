@@ -93,7 +93,7 @@ static int inline i2c_send(const ssd1306_t *dev, uint8_t reg, uint8_t* data, uin
     size_t written;
     
     
-    err = i2c_write_reg((dev->i2c_dev.addr)<<1, reg, len, &written, data );
+    err = i2c_write_reg(&(dev->i2c_dev.bus),(dev->i2c_dev.addr)<<1, reg, len, &written, data );
     if(err != I2C_SUCCESS)
     {
         Debug_LOG_ERROR("i2c_write() returned error %d", err);

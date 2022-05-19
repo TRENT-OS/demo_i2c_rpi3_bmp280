@@ -1,0 +1,9 @@
+
+
+procedure if_BMP280 {
+    include "float.h";
+    void get_data(
+    out float temperature,
+    out float pressure,
+    out float humidity);
+}

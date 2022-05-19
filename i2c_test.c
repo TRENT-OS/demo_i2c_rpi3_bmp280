@@ -7,9 +7,7 @@
 #include "lib_debug/Debug.h"
 #include "i2c.h"
 #include "ssd1306.h"
-#include "bmp280.h"
 #include <stdint.h>
-#include <stdbool.h>
 #include "fonts.h"
 //#include "OS_Dataport.h"
 
@@ -23,19 +21,6 @@
 
 
 static uint8_t buffer[DISPLAY_WIDTH * DISPLAY_HEIGHT / 8];
-
-void getSensorData(bmp280_t* bmp280_dev)
-{
-    bool bme280p = bmp280_dev->id == BME280_CHIP_ID;
-    float pressure, temperature, humidity;
-
-    bmp280_read_float(bmp280_dev, &temperature, &pressure, &humidity);
-    Debug_LOG_INFO("Pressure: %.2f Pa, Temperature: %.2f C", pressure, temperature);
-    if (bme280p)
-    {
-        Debug_LOG_INFO("Humidity: %.2f %%", humidity);
-    }
-}
 
 void writeDatatoDisplay(ssd1306_t* ssd1306_dev, char* str, char* einheit ,float value)
 {
@@ -77,13 +62,13 @@ void wait(void)
     }
 }
 
-void runDemo(bmp280_t* bmp280_dev, ssd1306_t* ssd1306_dev)
+void runDemo( ssd1306_t* ssd1306_dev)
 {
     float pressure, temperature, humidity;
 
     while(1)
     {
-        bmp280_read_float(bmp280_dev, &temperature, &pressure, &humidity);
+        bmp280_rpc_get_data( &temperature, &pressure, &humidity);
         writeDatatoDisplay(ssd1306_dev,"Temperatur: ", "C", temperature);
         wait();
         writeDatatoDisplay(ssd1306_dev,"Luftdruck: ", "hPa", pressure/100 );
@@ -189,23 +174,6 @@ OS_Error_t run(void)
 
     Debug_LOG_INFO("ctrl_meas dump is 0x%x", buf[0]);
 
-    bmp280_params_t params;
-
-
-    bmp280_init_default_params(&params);
-
-    bmp280_t bmp280_dev = {
-    .i2c_dev.bus = IF_I2C_ASSIGN(i2c_rpc, i2c_port, i2cBus_notify),
-    .i2c_dev.addr = BMP280_I2C_ADDRESS_0,
-    };
-
-    bmp280_init(&bmp280_dev, &params);
-    Debug_LOG_INFO("BMP280 Initialised, now readout some data");
-    for(int i = 0; i < 5; i++)
-    {
-        getSensorData(&bmp280_dev);
-    }
-    Debug_LOG_INFO("BMP280 Test completed");
     ssd1306_t ssd1306_dev = {
         .protocol = SSD1306_PROTO_I2C,
         .screen = SSD1306_SCREEN,
@@ -228,7 +196,7 @@ OS_Error_t run(void)
         return err;
     }
     Debug_LOG_INFO("SSD1306 test completed, now running Demo!");
-    runDemo(&bmp280_dev, &ssd1306_dev);
+    runDemo( &ssd1306_dev);
     
     Debug_LOG_INFO("Done");
     return err;

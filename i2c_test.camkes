@@ -14,10 +14,14 @@ import <std_connector.camkes>;
 
 #include "components/i2c/i2c.camkes"
 
-I2C_MEMORY_COMPONENT_DEFINE(I2CDriver)
+#include "components/bmp280/bmp280.camkes"
+
+//I2C_MEMORY_COMPONENT_DEFINE(I2C_0)
 
 
 I2C_HARDWARE_COMPONENTS(I2CDriverHw)
+
+BMP280_COMPONENT_DEFINE(BMP280)
 
   component I2CTest {
     control;
@@ -26,6 +30,8 @@ I2C_HARDWARE_COMPONENTS(I2CDriverHw)
 
     uses        if_I2C              i2c_rpc;
     dataport    Buf                 i2c_port;
+
+    uses        if_BMP280           bmp280_rpc;
 
   }
   assembly {
@@ -36,7 +42,9 @@ I2C_HARDWARE_COMPONENTS(I2CDriverHw)
 
         component I2CTest i2ctest;
 
-        component I2CDriver  i2cdriver;
+        component BMP280 bmp280;
+
+        component I2C_1  i2cdriver;
         component I2CDriverHw i2cdriverhw;
 
         I2C_INSTANCE_CONNECT_CLIENT(
@@ -44,6 +52,15 @@ I2C_HARDWARE_COMPONENTS(I2CDriverHw)
             i2ctest.i2c_rpc, i2ctest.i2c_port,
             i2ctest.i2cBus_notify, 1
         )
+        I2C_INSTANCE_CONNECT_CLIENT(
+             i2cdriver,
+             bmp280.i2c_rpc, bmp280.i2c_port,
+             bmp280.i2cBus_notify, 2
+        )
+        connection seL4RPCCall bmp280_rpc (
+          from i2ctest.bmp280_rpc,
+          to bmp280.bmp280_rpc
+        );
         I2C_HARDWARE_INSTANCE_CONNECT(
             i2cdriver,
             i2cdriverhw
@@ -52,7 +69,7 @@ I2C_HARDWARE_COMPONENTS(I2CDriverHw)
       configuration {
         I2C_HARDWARE_INSTANCE_CONFIGURE_SELF(
             i2cdriverhw,
-            I2C0_ADDR)
+            I2C1_ADDR)
     }
 
   }

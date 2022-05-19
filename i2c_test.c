@@ -134,6 +134,11 @@ OS_Error_t run(void)
     I2C_Error_t i2c_err = I2C_SUCCESS;
     size_t tmp = 0;
 
+    while(!bmp280_rpc_sensor_ready())
+    {
+        seL4_Yield();
+    }
+
     if_I2C_t bus = IF_I2C_ASSIGN(i2c_rpc, i2c_port, i2cBus_notify);    
     uint8_t buf[20];
     buf[0] = 0xd0;

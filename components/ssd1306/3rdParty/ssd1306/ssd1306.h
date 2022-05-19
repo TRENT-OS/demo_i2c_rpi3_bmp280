@@ -16,13 +16,18 @@
 #include "fonts.h"
 
 #include "config.h"
-#include "bmp280.h"
+
 
 // shifted
 #if (SSD1306_I2C_SUPPORT)
     #include <i2c_lib.h>
     #define SSD1306_I2C_ADDR_0    (0x3C)
     #define SSD1306_I2C_ADDR_1    (0x3D)
+    typedef struct
+    {
+        if_I2C_t bus;
+        uint8_t addr;
+    } i2c_dev_t;
 #endif
 
 #ifdef __cplusplus

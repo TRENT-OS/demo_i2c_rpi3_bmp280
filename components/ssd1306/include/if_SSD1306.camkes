@@ -1,0 +1,15 @@
+
+procedure if_SSD1306 {
+    include "stdint.h";
+    
+    void clear_display(void);
+
+    int write_string(
+        in int len,
+        in int font_face, 
+        in uint8_t x, 
+        in uint8_t y
+    );
+
+    int update_display(void);
+}

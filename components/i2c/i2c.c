@@ -23,7 +23,7 @@ static struct
     OS_Dataport_t   port_storage;
 } ctx =
 {
-    .mutex = 0,
+    .mutex = 1,
     .init_ok = false,
     .port_storage = OS_DATAPORT_ASSIGN(i2c_port)
 };
@@ -68,6 +68,7 @@ void post_init(void);
 
 void post_init(void)
 {
+    ctx.mutex = 1;
     Debug_LOG_DEBUG("[%s] %s id: %i", get_instance_name(), __func__, I2C_CONFIG_ID);
     if(! _i2c_init())
     {
@@ -77,6 +78,7 @@ void post_init(void)
 
     ctx.init_ok = true;
     ctx.mutex = 0;
+    notify_unlock();
     Debug_LOG_INFO("%s done", get_instance_name());
 }
 

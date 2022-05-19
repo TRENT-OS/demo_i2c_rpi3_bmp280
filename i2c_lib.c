@@ -13,6 +13,29 @@
 
 //OS_Dataport_t port_storage = OS_DATAPORT_ASSIGN(i2c_port);
 
+I2C_Error_t i2c_wait_for_bus_initialisation(const if_I2C_t* bus)
+{
+    I2C_Error_t ret;
+    while(1)
+    {
+        ret = bus->mutex_try_lock();
+        if(ret == I2C_SUCCESS)
+        {
+            bus->mutex_unlock();
+            return ret;
+        }
+        if((ret == I2C_ERROR_NOT_INITIALISED) || (ret == I2C_ERROR_MUTEX_LOCKED))
+        {        
+            bus->notify_wait();
+            continue;
+
+        }
+        Debug_LOG_ERROR("i2c_wait_for_bus_initialisation() failed with %d",ret);
+        return ret;
+    }
+}
+
+
 I2C_Error_t i2c_mutex_lock(const if_I2C_t* bus)
 {
     I2C_Error_t ret;

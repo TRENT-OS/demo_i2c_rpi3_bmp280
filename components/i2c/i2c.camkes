@@ -12,7 +12,6 @@ import <std_connector.camkes>;
   * Declare the I2C Bus driver component:
   */
 
-#include "plat_i2c.camkes"
 
 
 #define I2C_MEMORY_COMPONENT_DEFINE( \
@@ -29,6 +28,7 @@ component _inst_ { \
     I2C_HARDWARE_INTERFACES\
 }
 
+#include "plat_i2c.camkes"
 
 #define I2C_INSTANCE_CONNECT_CLIENT( \
     _inst_, \
@@ -38,12 +38,12 @@ component _inst_ { \
     _num_) \
     \
     connection  seL4RPCCall \
-        _inst_ ## _i2c_rpc( \
+        _inst_ ## _i2c_rpc ## _num_ ( \
             from _peer_inst_rpc_,\
             to   _inst_.i2c_rpc);\
         \
     connection  seL4SharedData \
-        _inst_ ## _storage_port( \
+        _inst_ ## _storage_port ## _num_( \
             from _peer_inst_port_, \
             to   _inst_.i2c_port); \
     connection seL4NotificationNative \

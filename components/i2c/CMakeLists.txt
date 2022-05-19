@@ -16,7 +16,7 @@ cmake_minimum_required(VERSION 3.17)
 #
 
 
-function(I2C_DeclareCAmkESComponent name )
+function(I2C_DeclareCAmkESComponent name id)
     set(dir_plat "${CMAKE_CURRENT_FUNCTION_LIST_DIR}/src/plat/${PLATFORM}")
     set(test_dir "${CMAKE_CURRENT_FUNCTION_LIST_DIR}")
     if(NOT IS_DIRECTORY "${dir_plat}")
@@ -46,6 +46,7 @@ function(I2C_DeclareCAmkESComponent name )
         C_FLAGS
             -Wall
             -Werror
+            -DI2C_CONFIG_ID=${id}
         LIBS
             os_core_api
             lib_debug
@@ -65,5 +66,6 @@ function(DeclareCAmkESComponents_for_I2Cs)
     endif()
 
     CAmkESAddCPPInclude("${dir_plat}")
+    include("${dir_plat}/plat_i2c.cmake")
     
 endfunction()

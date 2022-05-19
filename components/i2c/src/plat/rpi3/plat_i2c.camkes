@@ -52,3 +52,7 @@ component _inst_ { \
     _inst_.regBase_size = I2C_SIZE;\
     _inst_.gpioBase_paddr = GPIO_ADDR;\
     _inst_.gpioBase_size = GPIO_SIZE;
+
+// Create a CAmkES component for each I2C port
+I2C_MEMORY_COMPONENT_DEFINE(I2C_0)
+I2C_MEMORY_COMPONENT_DEFINE(I2C_1)

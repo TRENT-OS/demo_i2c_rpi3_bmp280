@@ -8,8 +8,18 @@
 
 
 #define RPi3
-#define I2C0
+// I2C ID used by lib-platsupport must be set
+#if !defined(I2C_CONFIG_ID)
+#error "I2C_CONFIG_ID missing"
+#endif
 
+#if I2C_CONFIG_ID == 1
+#define I2C0
+#elif I2C_CONFIG_ID == 2
+#define I2C1
+#else
+#error "I2C_CONFIG_ID not supported"
+#endif 
 /*! Base Address of the BSC0 registers */
 #define BCM2837_BSC0_BASE       0x205000
 /*! Base Address of the BSC1 registers */

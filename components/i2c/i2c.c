@@ -68,7 +68,7 @@ void post_init(void);
 
 void post_init(void)
 {
-    Debug_LOG_DEBUG("[%s] %s", get_instance_name(), __func__);
+    Debug_LOG_DEBUG("[%s] %s id: %i", get_instance_name(), __func__, I2C_CONFIG_ID);
     if(! _i2c_init())
     {
         Debug_LOG_ERROR("_i2c_init() failed, Platform initialisation could not be performed for %s", get_instance_name());

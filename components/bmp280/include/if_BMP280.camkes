@@ -2,8 +2,13 @@
 
 procedure if_BMP280 {
     include "float.h";
+    include "stdbool.h";
     void get_data(
     out float temperature,
     out float pressure,
     out float humidity);
+
+    bool sensor_ready(
+        void
+    );
 }

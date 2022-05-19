@@ -14,6 +14,8 @@ import <std_connector.camkes>;
 
 #include "components/i2c/i2c.camkes"
 
+#include "components/ssd1306/ssd1306.camkes"
+
 #include "components/bmp280/bmp280.camkes"
 
 //I2C_MEMORY_COMPONENT_DEFINE(I2C_0)
@@ -22,6 +24,8 @@ import <std_connector.camkes>;
 I2C_HARDWARE_COMPONENTS(I2CDriverHw)
 
 BMP280_COMPONENT_DEFINE(BMP280)
+
+SSD1306_COMPONENT_DEFINE(SSD1306)
 
   component I2CTest {
     control;
@@ -33,6 +37,9 @@ BMP280_COMPONENT_DEFINE(BMP280)
 
     uses        if_BMP280           bmp280_rpc;
 
+    uses        if_SSD1306          ssd1306_rpc;
+    dataport    Buf                 ssd1306_port;
+
   }
   assembly {
       composition {
@@ -43,8 +50,9 @@ BMP280_COMPONENT_DEFINE(BMP280)
         component I2CTest i2ctest;
 
         component BMP280 bmp280;
+        component SSD1306 ssd1306;
 
-        component I2C_1  i2cdriver;
+        component I2C_0  i2cdriver;
         component I2CDriverHw i2cdriverhw;
 
         I2C_INSTANCE_CONNECT_CLIENT(
@@ -57,6 +65,19 @@ BMP280_COMPONENT_DEFINE(BMP280)
              bmp280.i2c_rpc, bmp280.i2c_port,
              bmp280.i2cBus_notify, 2
         )
+        I2C_INSTANCE_CONNECT_CLIENT(
+            i2cdriver,
+            ssd1306.i2c_rpc, ssd1306.i2c_port,
+            ssd1306.i2cBus_notify, 3
+        )
+        connection seL4RPCCall ssd1306_rpc (
+          from i2ctest.ssd1306_rpc,
+          to ssd1306.ssd1306_rpc
+        );
+        connection seL4SharedData ssd1306_port (
+          from i2ctest.ssd1306_port,
+          to ssd1306.ssd1306_port
+        );
         connection seL4RPCCall bmp280_rpc (
           from i2ctest.bmp280_rpc,
           to bmp280.bmp280_rpc
@@ -69,7 +90,7 @@ BMP280_COMPONENT_DEFINE(BMP280)
       configuration {
         I2C_HARDWARE_INSTANCE_CONFIGURE_SELF(
             i2cdriverhw,
-            I2C1_ADDR)
+            I2C0_ADDR)
     }
 
   }

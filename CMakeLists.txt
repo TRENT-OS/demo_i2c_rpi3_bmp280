@@ -22,9 +22,11 @@ os_set_config_file(
 
 project(i2c_test C)
 include(${CMAKE_CURRENT_SOURCE_DIR}/components/bmp280/CMakeLists.txt)
+include(${CMAKE_CURRENT_SOURCE_DIR}/components/ssd1306/CMakeLists.txt)
 include(${CMAKE_CURRENT_SOURCE_DIR}/components/i2c/CMakeLists.txt)
 DeclareCAmkESComponents_for_I2Cs()
 BMP280_DeclareCAmkESComponent(BMP280)
+SSD1306_Declare_CAmkESComponent(SSD1306)
 DeclareCAmkESComponent(
     I2CTest
     SOURCES

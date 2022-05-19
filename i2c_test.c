@@ -9,7 +9,7 @@
 #include "ssd1306.h"
 #include <stdint.h>
 #include "fonts.h"
-//#include "OS_Dataport.h"
+#include <string.h>
 
 #include <camkes.h>
 
@@ -20,34 +20,45 @@
 #define DEVICE (0x76 << 1)
 
 
-static uint8_t buffer[DISPLAY_WIDTH * DISPLAY_HEIGHT / 8];
+OS_Dataport_t ssd1306_port_storage = OS_DATAPORT_ASSIGN(ssd1306_port);
 
-void writeDatatoDisplay(ssd1306_t* ssd1306_dev, char* str, char* einheit ,float value)
+int ssd1306_write_string(char * str, int len,font_face_t font_face , uint8_t x, uint8_t y)
 {
-    char buf[20];
-    const font_info_t *font = NULL;
-    font_face_t font_face = FONT_FACE_GLCD5x7;
-    int ret = 0;
-
-    font = font_builtin_fonts[font_face];
-    ret = ssd1306_fill_rectangle(ssd1306_dev, buffer, 0, 0, DISPLAY_WIDTH, DISPLAY_HEIGHT, OLED_COLOR_BLACK);
-    if(ret != 0)
+    uint8_t* ssd1306_buf = OS_Dataport_getBuf(ssd1306_port_storage);
+    size_t ssd1306_buf_size = OS_Dataport_getSize(ssd1306_port_storage);
+    if(*(str  + len) != '\0')
     {
-        Debug_LOG_ERROR("ssd1306_fill_rectangle() returned %d", ret);
+        Debug_LOG_ERROR("C Stings need to terminate with a NULL character");
+        return -1;
     }
-    ret = ssd1306_draw_string(ssd1306_dev, buffer, font, 20, 0, str, OLED_COLOR_WHITE, OLED_COLOR_BLACK);
+    if(len + 1 > ssd1306_buf_size)
+    {
+        Debug_LOG_ERROR("String to big for shared memory");
+        return -1;
+    }
+    memcpy(ssd1306_buf, str, len);
+    return ssd1306_rpc_write_string(len, (int) font_face, x, y );
+
+}
+
+void writeDatatoDisplay( char* str, char* einheit ,float value)
+{
+    int ret;
+    char buf[20];
+
+    ssd1306_rpc_clear_display();
+    ret = ssd1306_write_string(str,strlen(str),FONT_FACE_GLCD5x7, 20, 0);
     if(ret < 0)
     {
         Debug_LOG_ERROR("ssd1306_draw_string() with GLCD5X7 Font returned %d", ret);
     }
     sprintf(buf," %.1f %s", value, einheit);
-    font = font_builtin_fonts[FONT_FACE_TERMINUS_10X18_ISO8859_1];
-    ret = ssd1306_draw_string(ssd1306_dev, buffer, font, 15, 10, buf, OLED_COLOR_WHITE, OLED_COLOR_BLACK);
+    ret = ssd1306_write_string(buf, strlen(buf), FONT_FACE_TERMINUS_10X18_ISO8859_1, 15, 10);
     if(ret < 0)
     {
         Debug_LOG_ERROR("ssd1306_draw_string() with TERMINUS_10x18 returned %d", ret);
     }
-    ret = ssd1306_load_frame_buffer(ssd1306_dev, buffer);
+    ret = ssd1306_rpc_update_display();
     if(ret != 0)
     {
         Debug_LOG_ERROR("ssd1306_load_frame_buffer() returned %d", ret);
@@ -62,71 +73,22 @@ void wait(void)
     }
 }
 
-void runDemo( ssd1306_t* ssd1306_dev)
+void runDemo( void)
 {
     float pressure, temperature, humidity;
 
     while(1)
     {
         bmp280_rpc_get_data( &temperature, &pressure, &humidity);
-        writeDatatoDisplay(ssd1306_dev,"Temperatur: ", "C", temperature);
+        writeDatatoDisplay("Temperatur: ", "C", temperature);
         wait();
-        writeDatatoDisplay(ssd1306_dev,"Luftdruck: ", "hPa", pressure/100 );
+        writeDatatoDisplay("Luftdruck: ", "hPa", pressure/100 );
         wait();
-        writeDatatoDisplay(ssd1306_dev,"Luftfeuchte: ", "%", humidity);
+        writeDatatoDisplay("Luftfeuchte: ", "%", humidity);
         wait();
     }
 }
 
-OS_Error_t Test_SSD1306(ssd1306_t* dev)
-{
-    const font_info_t *font = NULL;
-    font_face_t font_face = FONT_FACE_GLCD5x7;
-    int drawn_char = 0;
-    OS_Error_t err = OS_SUCCESS;
-
-    font = font_builtin_fonts[font_face];
-    if (ssd1306_fill_rectangle(dev, buffer, 0, 0, DISPLAY_WIDTH, DISPLAY_HEIGHT/2, OLED_COLOR_WHITE) != 0)
-    {
-        Debug_LOG_ERROR("SSD1306_fill_rectangle() failed!");
-        err = OS_ERROR_ABORTED;
-        return err;
-    }
-    if(ssd1306_load_frame_buffer(dev, buffer))
-    {
-        Debug_LOG_ERROR("SSD1306_load_frame_buffer() failed!");
-        err = OS_ERROR_ABORTED;
-        return err;
-    }
-    //wait();
-    //ssd1306_display_on(&dev, true);
-    ssd1306_set_whole_display_lighting(dev, false);
-    wait();
-    ssd1306_fill_rectangle(dev, buffer, 0, 0, DISPLAY_WIDTH, DISPLAY_HEIGHT, OLED_COLOR_BLACK);
-    ssd1306_load_frame_buffer(dev, buffer);
-    wait();
-    drawn_char = ssd1306_draw_string(dev, buffer, font, 0, 0, "Hello, SeL4!", OLED_COLOR_WHITE, OLED_COLOR_BLACK);
-    Debug_LOG_INFO("ssd1306_draw_string() returned %i", drawn_char);
-    if(ssd1306_load_frame_buffer(dev, buffer))
-    {
-        Debug_LOG_ERROR("SSD1306_load_frame_buffer() failed!");
-        err = OS_ERROR_ABORTED;
-        return err;
-    }
-    wait();
-    font_face = FONT_FACE_TERMINUS_10X18_ISO8859_1;
-    font = font_builtin_fonts[font_face];
-    drawn_char = ssd1306_draw_string(dev, buffer, font, 0, 0, "Hello, SeL4!", OLED_COLOR_WHITE, OLED_COLOR_BLACK);
-    Debug_LOG_INFO("ssd1306_draw_string() returned %i", drawn_char);
-    if(ssd1306_load_frame_buffer(dev, buffer))
-    {
-        Debug_LOG_ERROR("SSD1306_load_frame_buffer() failed!");
-        err = OS_ERROR_ABORTED;
-        return err;
-    }
-    wait();
-    return err;
-}
 
 OS_Error_t run(void)
 {
@@ -151,7 +113,7 @@ OS_Error_t run(void)
         return err;
     }
 
-    i2c_err = i2c_write(&bus, DEVICE, 1, &tmp, buf);
+    i2c_err = i2c_read(&bus, DEVICE, 1, &tmp, buf);
     if(i2c_err != I2C_SUCCESS)
     {
         Debug_LOG_ERROR("i2c_read() returned errorcode %d", i2c_err);
@@ -169,7 +131,7 @@ OS_Error_t run(void)
         return err;
     }
 
-    i2c_err = i2c_write(&bus, DEVICE, 1, &tmp, buf);
+    i2c_err = i2c_read(&bus, DEVICE, 1, &tmp, buf);
     if(i2c_err != I2C_SUCCESS)
     {
         Debug_LOG_ERROR("i2c_read() returned errorcode %d", i2c_err);
@@ -179,29 +141,7 @@ OS_Error_t run(void)
 
     Debug_LOG_INFO("ctrl_meas dump is 0x%x", buf[0]);
 
-    ssd1306_t ssd1306_dev = {
-        .protocol = SSD1306_PROTO_I2C,
-        .screen = SSD1306_SCREEN,
-        .i2c_dev.bus = IF_I2C_ASSIGN(i2c_rpc, i2c_port, i2cBus_notify),
-        .i2c_dev.addr = SSD1306_I2C_ADDR_0,
-        .width = DISPLAY_WIDTH,
-        .height = DISPLAY_HEIGHT
-    };
-
-    if(ssd1306_init(&ssd1306_dev) != 0)
-    {
-        Debug_LOG_ERROR("SSD1306 Initialisation failde!");
-        err = OS_ERROR_ABORTED;
-        return err;
-    }
-    Debug_LOG_INFO("SSD1306 Initialised, write hello world on screen");
-    if (Test_SSD1306(&ssd1306_dev) != OS_SUCCESS)
-    {
-        err = OS_ERROR_ABORTED;
-        return err;
-    }
-    Debug_LOG_INFO("SSD1306 test completed, now running Demo!");
-    runDemo( &ssd1306_dev);
+    runDemo();
     
     Debug_LOG_INFO("Done");
     return err;

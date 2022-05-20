@@ -3,7 +3,7 @@
  */
 
  procedure if_I2C{
-    include "i2c.h";
+    include "if_i2c.h";
     include "stdint.h";
 
 

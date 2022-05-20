@@ -11,7 +11,7 @@
 #include "lib_debug/Debug.h"
 #include "plat_i2c.h"
 
-#include "i2c.h"
+#include "if_i2c.h"
 
 #include <camkes.h>
 #include <camkes/io.h>
@@ -84,7 +84,7 @@ void post_init(void)
 
 I2C_Error_t i2c_rpc_init_slave(int dev)
 {
-    return I2C_ERROR_NOT_IMPLEMENTED;
+    return _i2c_init_slave(dev);
 }
 
 

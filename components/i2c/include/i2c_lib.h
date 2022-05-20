@@ -1,10 +1,12 @@
 
 
-#include "i2c.h"
+#include "if_i2c.h"
 
 #include <stdint.h>
 
 I2C_Error_t i2c_wait_for_bus_initialisation(const if_I2C_t* bus);
+
+I2C_Error_t i2c_init_slave(const if_I2C_t* bus, int dev);
 
 I2C_Error_t i2c_write(const if_I2C_t* bus, int dev, size_t len, size_t *written, const uint8_t* buf);
 

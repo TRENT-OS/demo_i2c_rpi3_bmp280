@@ -6,7 +6,7 @@
 #include <string.h>
 
 #include "i2c_lib.h"
-#include "i2c.h"
+#include "if_i2c.h"
 
 #include <camkes.h>
 
@@ -62,6 +62,37 @@ I2C_Error_t i2c_mutex_unlock(const if_I2C_t* bus)
     return bus->mutex_unlock();
 }
 
+I2C_Error_t i2c_init_slave(const if_I2C_t* bus, int dev)
+{
+    // On the I2C bus the LSB bit is the read/write flag. We expect
+    // the last bit to be a zero
+    if((dev & 1) != 0)
+    {
+        Debug_LOG_ERROR("i2c_write_reg() expected an even address");
+        return I2C_ERROR_INVALID_PARAMETER;
+    }
+    
+    // Test if Address is bigger than 10 Bits. This is unsupported
+    if((dev  >> 11) != 0)
+    {
+        Debug_LOG_ERROR("i2c_write_reg() Address can not be bigger than 10 bits");
+        return I2C_ERROR_INVALID_PARAMETER;
+    }
+
+    I2C_Error_t ret = i2c_mutex_lock(bus);
+    if(ret != I2C_SUCCESS)
+    {
+        Debug_LOG_ERROR("I2C_mutex_lock() returned error %d", ret);
+        return ret;
+    }
+    ret =  bus->init_slave(dev);
+    i2c_mutex_unlock(bus); 
+    if( (ret != I2C_SUCCESS) && (ret != I2C_ERROR_NOT_IMPLEMENTED) )
+    {
+        Debug_LOG_ERROR("Could not register device %zx, init slave() returned %d", dev, ret);
+    }
+    return ret;
+}
 
 I2C_Error_t i2c_write(const if_I2C_t* bus,int dev, size_t len, size_t *written, const uint8_t* buf)
 {
@@ -124,10 +155,11 @@ I2C_Error_t i2c_write_reg(const if_I2C_t* bus, int dev, int reg, size_t len, siz
     }*/
 
     memcpy(&(i2c_buf[i2c_buf_offset]),buf, len);
+   // Debug_LOG_DEBUG("i2c_write_reg() write to %zx", dev);
     ret = bus->write(dev, len + i2c_buf_offset, written);
     if (ret != I2C_SUCCESS)
     {
-        Debug_LOG_ERROR("i2c_write_reg() returned error %d", ret);
+        Debug_LOG_ERROR("i2c_write_reg() returned error %d for devize %zx", ret, dev);
     }
     *written = *written - i2c_buf_offset;
     i2c_mutex_unlock(bus);

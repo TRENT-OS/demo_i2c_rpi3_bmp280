@@ -33,6 +33,7 @@ function(I2C_DeclareCAmkESComponent name id)
     if(NOT I2C_LIB_INCLUDE)
         set(I2C_LIB_INCLUDE)
     endif()
+
     DeclareCAmkESComponent(
         ${name}
         INCLUDES

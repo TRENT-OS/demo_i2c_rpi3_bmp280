@@ -3,10 +3,12 @@
 
 #include "if_i2c.h"
 
+#include "arch/arm/i2c.h"
+
 #include <stdint.h>
 #include <stdbool.h>
 
-
+#define MAX_I2C_SLAVES 20
 
 bool _i2c_init(void);
 

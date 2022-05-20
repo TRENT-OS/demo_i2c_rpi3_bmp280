@@ -25,6 +25,11 @@ bool _i2c_init(void)
     return true;
 }
 
+I2C_Error_t _i2c_init_slave(int dev)
+{
+    return I2C_ERROR_NOT_IMPLEMENTED;
+}
+
 I2C_Error_t _i2c_write(int dev, const uint8_t* buf, size_t len, size_t* written)
 {
     int ret = 0;
@@ -59,7 +64,7 @@ I2C_Error_t _i2c_write(int dev, const uint8_t* buf, size_t len, size_t* written)
 }
 
 
-I2C_Error_t _i2c_read(int dev, const uint8_t *buf, size_t len, size_t *read)
+I2C_Error_t _i2c_read(int dev, uint8_t *buf, size_t len, size_t *read)
 {
     int ret = 0;
     *read = 0;

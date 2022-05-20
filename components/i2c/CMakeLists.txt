@@ -39,6 +39,7 @@ function(I2C_DeclareCAmkESComponent name id)
         INCLUDES
             ${CMAKE_CURRENT_FUNCTION_LIST_DIR}/include
             ${CMAKE_CURRENT_FUNCTION_LIST_DIR}/include/plat/${PLATFORM}
+            ${CMAKE_CURRENT_FUNCTION_LIST_DIR}/include/plat/
             ${I2C_LIB_INCLUDE}
         SOURCES
             ${CMAKE_CURRENT_FUNCTION_LIST_DIR}/i2c.c

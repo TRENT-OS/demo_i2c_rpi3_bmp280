@@ -5,7 +5,7 @@
 
 #include "OS_Error.h"
 #include "lib_debug/Debug.h"
-#include "i2c.h"
+#include "if_i2c.h"
 #include "ssd1306.h"
 #include <stdint.h>
 #include "fonts.h"
@@ -104,6 +104,7 @@ OS_Error_t run(void)
     if_I2C_t bus = IF_I2C_ASSIGN(i2c_rpc, i2c_port, i2cBus_notify);    
     uint8_t buf[20];
     buf[0] = 0xd0;
+    i2c_init_slave(&bus, DEVICE);
 
     i2c_err = i2c_write(&bus, DEVICE, 1, &tmp, buf);
     if(i2c_err != I2C_SUCCESS)
@@ -141,6 +142,7 @@ OS_Error_t run(void)
 
     Debug_LOG_INFO("ctrl_meas dump is 0x%x", buf[0]);
 
+    Debug_LOG_INFO("Running Demo now");
     runDemo();
     
     Debug_LOG_INFO("Done");

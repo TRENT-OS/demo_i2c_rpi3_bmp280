@@ -52,10 +52,11 @@ SSD1306_COMPONENT_DEFINE(SSD1306)
 
         component BMP280 bmp280;
         component SSD1306 ssd1306;
-
-        component I2C_3  i2cdriver;
         #ifdef I2C_HARDWARE_COMPONENTS
+        component I2C_1  i2cdriver;
         component I2CDriverHw i2cdriverhw;
+        #else
+        component I2C_3  i2cdriver;
         #endif
 
         I2C_INSTANCE_CONNECT_CLIENT(

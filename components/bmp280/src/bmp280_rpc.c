@@ -22,7 +22,10 @@ void post_init(void)
     bmp280_params_t params;
     bmp280_init_default_params(&params);
     i2c_wait_for_bus_initialisation(&(bmp280_dev.i2c_dev.bus));
+    
     Debug_LOG_INFO("[%s] I2C ready, now initialising sensor", get_instance_name());
+    i2c_init_slave(&(bmp280_dev.i2c_dev.bus), (bmp280_dev.i2c_dev.addr << 1) );
+    
     bmp280_init(&bmp280_dev, &params);
     Debug_LOG_INFO("bmp280 initialised");
     init = true;

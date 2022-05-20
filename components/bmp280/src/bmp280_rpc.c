@@ -15,6 +15,14 @@ static bmp280_t bmp280_dev = {
 
 static bool init = false;
 
+/**
+ * @brief Function called when module is started
+ * 
+ * @details Initialises the BMP280 library used. Once ready sets internal init
+ *          state to true. Sensor library will read out some calibration
+ *          Data from the sensor, so this can take some time.
+ * 
+ */
 void post_init(void)
 {
     Debug_LOG_DEBUG("[%s] %s running", get_instance_name(), __func__);

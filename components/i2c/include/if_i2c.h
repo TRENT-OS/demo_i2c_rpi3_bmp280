@@ -7,6 +7,11 @@
 #include <stddef.h>
 #include "OS_Dataport.h"
 
+
+/**
+ * @brief Error codes used by this component
+ * 
+ */
 typedef enum {
     I2C_ERROR_TRY_AGAIN = -9,
     I2C_ERROR_MUTEX_LOCKED,
@@ -23,6 +28,11 @@ typedef enum {
 }
 I2C_Error_t;
 
+/**
+ * @brief Data structure used to manage the different potential I2C Interfaces
+ *        in Use. Needed by the i2c_lib
+ * 
+ */
 typedef struct
 {
     OS_Dataport_t port_storage;
@@ -34,6 +44,11 @@ typedef struct
     void (*notify_wait)(void);
 } if_I2C_t;
 
+/**
+ * @brief Initialise the management struct of the i2c_lib with the correct
+ *        function, port, and event pointer
+ * 
+ */
 #define IF_I2C_ASSIGN(_rpc_, _port_, _evt_)    \
 {                                              \
     .port_storage = OS_DATAPORT_ASSIGN(_port_), \

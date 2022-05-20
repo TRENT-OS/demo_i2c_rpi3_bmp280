@@ -5,7 +5,8 @@
 
 #include "OS_Error.h"
 #include "lib_debug/Debug.h"
-#include "if_i2c.h"
+//#include "if_i2c.h"
+#include "i2c_lib.h"
 #include "ssd1306.h"
 #include <stdint.h>
 #include "fonts.h"

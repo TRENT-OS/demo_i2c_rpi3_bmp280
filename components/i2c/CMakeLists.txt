@@ -71,3 +71,26 @@ function(DeclareCAmkESComponents_for_I2Cs)
     include("${dir_plat}/plat_i2c.cmake")
     
 endfunction()
+
+
+
+
+function(I2C_DeclareClientLibrary)
+    project(i2c_client C)
+    
+    add_library(${PROJECT_NAME} INTERFACE)
+
+    target_sources(${PROJECT_NAME}
+            INTERFACE
+            ${CMAKE_CURRENT_FUNCTION_LIST_DIR}/client/src/i2c_lib.c
+    )
+
+    target_include_directories(${PROJECT_NAME}
+            INTERFACE
+            ${CMAKE_CURRENT_FUNCTION_LIST_DIR}/client/include
+            ${CMAKE_CURRENT_FUNCTION_LIST_DIR}/include
+            )
+
+endfunction()
+
+I2C_DeclareClientLibrary()

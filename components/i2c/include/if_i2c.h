@@ -31,7 +31,6 @@ I2C_Error_t;
 /**
  * @brief Data structure used to manage the different potential I2C Interfaces
  *        in Use. Needed by the i2c_lib
- * 
  */
 typedef struct
 {
@@ -47,7 +46,6 @@ typedef struct
 /**
  * @brief Initialise the management struct of the i2c_lib with the correct
  *        function, port, and event pointer
- * 
  */
 #define IF_I2C_ASSIGN(_rpc_, _port_, _evt_)    \
 {                                              \

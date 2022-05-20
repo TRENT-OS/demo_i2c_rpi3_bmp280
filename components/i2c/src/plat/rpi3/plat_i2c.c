@@ -14,12 +14,14 @@ void print_i2c_regs(void);
 
 bool _i2c_init(void)
 {
+    // Initialise Support library
     if(!bcm2837_i2c_begin(regBase, gpioBase))
     {
         Debug_LOG_ERROR("bcm2837_i2c_begin() failed");
         return false;
     }
     bcm2837_i2c_set_baudrate(100000);
+    // Print Peripheral registers
     print_gpio_regs();
     print_i2c_regs();
     return true;

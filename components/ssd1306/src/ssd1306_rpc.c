@@ -33,6 +33,9 @@ void post_init(void)
     init = false;
 
     i2c_wait_for_bus_initialisation(&(ssd1306_dev.i2c_dev.bus));
+
+    i2c_init_slave(&(ssd1306_dev.i2c_dev.bus), (ssd1306_dev.i2c_dev.addr << 1) );
+ 
     int ret = ssd1306_init(&ssd1306_dev);
     if(ret != 0)
     {

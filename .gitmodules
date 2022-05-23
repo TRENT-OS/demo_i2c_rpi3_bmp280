@@ -1,3 +1,0 @@
-[submodule "component/bmp280/esp-open-rtos"]
-	path = component/bmp280/esp-open-rtos
-	url = https://github.com/SuperHouse/esp-open-rtos.git

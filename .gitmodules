@@ -1,3 +1,6 @@
 [submodule "components/i2c"]
 	path = components/i2c
 	url = https://bitbucket.hensoldt-cyber.systems/scm/sc/i2c.git
+[submodule "components/bmp280"]
+	path = components/bmp280
+	url = https://bitbucket.hensoldt-cyber.systems/scm/~flohau01/bmp280.git
